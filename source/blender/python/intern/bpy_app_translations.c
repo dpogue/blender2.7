@@ -708,7 +708,7 @@ static PyTypeObject BlenderAppTranslationsType = {
 	/* methods */
 	/* No destructor, this is a singleton! */
 	NULL,                       /* tp_dealloc */
-	NULL,                       /* printfunc tp_print; */
+	(printfunc)NULL,            /* printfunc tp_print; */
 	NULL,                       /* getattrfunc tp_getattr; */
 	NULL,                       /* setattrfunc tp_setattr; */
 	NULL,                       /* tp_compare */ /* DEPRECATED in python 3.0! */

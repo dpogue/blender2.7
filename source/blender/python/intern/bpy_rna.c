@@ -5813,7 +5813,7 @@ PyTypeObject pyrna_struct_meta_idprop_Type = {
 	0,                          /* tp_itemsize */
 	/* methods */
 	NULL,                       /* tp_dealloc */
-	NULL,                       /* printfunc tp_print; */
+	(printfunc)NULL,            /* printfunc tp_print; */
 	NULL,                       /* getattrfunc tp_getattr; */
 	NULL,                       /* setattrfunc tp_setattr; */
 	NULL,                       /* tp_compare */ /* deprecated in python 3.0! */
@@ -5895,7 +5895,7 @@ PyTypeObject pyrna_struct_Type = {
 	0,                          /* tp_itemsize */
 	/* methods */
 	(destructor) pyrna_struct_dealloc, /* tp_dealloc */
-	NULL,                       /* printfunc tp_print; */
+	(printfunc)NULL,            /* printfunc tp_print; */
 	NULL,                       /* getattrfunc tp_getattr; */
 	NULL,                       /* setattrfunc tp_setattr; */
 	NULL,                       /* tp_compare */ /* DEPRECATED in python 3.0! */
@@ -5984,7 +5984,7 @@ PyTypeObject pyrna_prop_Type = {
 	0,                          /* tp_itemsize */
 	/* methods */
 	(destructor) pyrna_prop_dealloc, /* tp_dealloc */
-	NULL,                       /* printfunc tp_print; */
+	(printfunc)NULL,            /* printfunc tp_print; */
 	NULL,                       /* getattrfunc tp_getattr; */
 	NULL,                       /* setattrfunc tp_setattr; */
 	NULL,                       /* tp_compare */ /* DEPRECATED in python 3.0! */
@@ -6068,7 +6068,7 @@ PyTypeObject pyrna_prop_array_Type = {
 	0,                          /* tp_itemsize */
 	/* methods */
 	(destructor)pyrna_prop_array_dealloc, /* tp_dealloc */
-	NULL,                       /* printfunc tp_print; */
+	(printfunc)NULL,            /* printfunc tp_print; */
 	NULL,                       /* getattrfunc tp_getattr; */
 	NULL,                       /* setattrfunc tp_setattr; */
 	NULL,                       /* tp_compare */ /* DEPRECATED in python 3.0! */
@@ -6151,7 +6151,7 @@ PyTypeObject pyrna_prop_collection_Type = {
 	0,                          /* tp_itemsize */
 	/* methods */
 	(destructor)pyrna_prop_dealloc, /* tp_dealloc */
-	NULL,                       /* printfunc tp_print; */
+	(printfunc)NULL,            /* printfunc tp_print; */
 	NULL,                       /* getattrfunc tp_getattr; */
 	NULL,                       /* setattrfunc tp_setattr; */
 	NULL,                       /* tp_compare */ /* DEPRECATED in python 3.0! */
@@ -6236,7 +6236,7 @@ static PyTypeObject pyrna_prop_collection_idprop_Type = {
 	0,                          /* tp_itemsize */
 	/* methods */
 	(destructor)pyrna_prop_dealloc, /* tp_dealloc */
-	NULL,                       /* printfunc tp_print; */
+	(printfunc)NULL,            /* printfunc tp_print; */
 	NULL,                       /* getattrfunc tp_getattr; */
 	NULL,                       /* setattrfunc tp_setattr; */
 	NULL,                       /* tp_compare */ /* DEPRECATED in python 3.0! */
@@ -6321,7 +6321,7 @@ PyTypeObject pyrna_func_Type = {
 	0,                          /* tp_itemsize */
 	/* methods */
 	NULL,                       /* tp_dealloc */
-	NULL,                       /* printfunc tp_print; */
+	(printfunc)NULL,            /* printfunc tp_print; */
 	NULL,                       /* getattrfunc tp_getattr; */
 	NULL,                       /* setattrfunc tp_setattr; */
 	NULL,                       /* tp_compare */ /* DEPRECATED in python 3.0! */
@@ -6417,7 +6417,7 @@ static PyTypeObject pyrna_prop_collection_iter_Type = {
 	0,                          /* tp_itemsize */
 	/* methods */
 	(destructor)pyrna_prop_collection_iter_dealloc, /* tp_dealloc */
-	NULL,                       /* printfunc tp_print; */
+	(printfunc)NULL,            /* printfunc tp_print; */
 	NULL,                       /* getattrfunc tp_getattr; */
 	NULL,                       /* setattrfunc tp_setattr; */
 	NULL,                       /* tp_compare */ /* DEPRECATED in python 3.0! */

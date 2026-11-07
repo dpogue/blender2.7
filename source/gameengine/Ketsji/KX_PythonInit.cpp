@@ -1556,7 +1556,7 @@ PyTypeObject PyRASOffScreen_Type = {
 	0,                                           /* tp_itemsize */
 	/* methods */
 	(destructor)PyRASOffScreen__tp_dealloc,      /* tp_dealloc */
-	NULL,                                        /* tp_print */
+	(printfunc)NULL,                             /* tp_print */
 	NULL,                                        /* tp_getattr */
 	NULL,                                        /* tp_setattr */
 	NULL,                                        /* tp_compare */

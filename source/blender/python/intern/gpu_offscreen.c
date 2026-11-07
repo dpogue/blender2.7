@@ -265,7 +265,7 @@ static PyTypeObject BPy_GPUOffScreen_Type = {
 	0,                                           /* tp_itemsize */
 	/* methods */
 	(destructor)BPy_GPUOffScreen__tp_dealloc,      /* tp_dealloc */
-	NULL,                                        /* tp_print */
+	(printfunc)NULL,                             /* tp_print */
 	NULL,                                        /* tp_getattr */
 	NULL,                                        /* tp_setattr */
 	NULL,                                        /* tp_compare */

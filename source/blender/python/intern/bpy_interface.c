@@ -270,6 +270,7 @@ void BPY_python_start(int argc, const char **argv)
 
 	Py_FrozenFlag = 1;
 
+	/* Initialize Python (also acquires lock). */
 	Py_Initialize();
 
 	// PySys_SetArgv(argc, argv);  /* broken in py3, not a huge deal */
@@ -287,8 +288,6 @@ void BPY_python_start(int argc, const char **argv)
 		Py_DECREF(py_argv);
 	}
 
-	/* Initialize thread support (also acquires lock) */
-	PyEval_InitThreads();
 #else
 	(void)argc;
 	(void)argv;

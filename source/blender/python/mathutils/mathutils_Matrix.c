@@ -2773,7 +2773,7 @@ PyTypeObject matrix_Type = {
 	sizeof(MatrixObject),               /*tp_basicsize*/
 	0,                                  /*tp_itemsize*/
 	(destructor)BaseMathObject_dealloc, /*tp_dealloc*/
-	NULL,                               /*tp_print*/
+	(printfunc)NULL,                    /*tp_print*/
 	NULL,                               /*tp_getattr*/
 	NULL,                               /*tp_setattr*/
 	NULL,                               /*tp_compare*/
@@ -3164,7 +3164,7 @@ PyTypeObject matrix_access_Type = {
 	sizeof(MatrixAccessObject),         /*tp_basicsize*/
 	0,                                  /*tp_itemsize*/
 	(destructor)MatrixAccess_dealloc,   /*tp_dealloc*/
-	NULL,                               /*tp_print*/
+	(printfunc)NULL,                    /*tp_print*/
 	NULL,                               /*tp_getattr*/
 	NULL,                               /*tp_setattr*/
 	NULL,                               /*tp_compare*/
