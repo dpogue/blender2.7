@@ -23,6 +23,10 @@
 #ifndef __PYTHON_UTILDEFINES_H__
 #define __PYTHON_UTILDEFINES_H__
 
+#if PY_VERSION_HEX < 0x030d0000 /* <3.13 */
+	#  define Py_HashPointer _Py_HashPointer
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -233,7 +233,7 @@ static PyObject *py_imbuf_repr(Py_ImBuf *self)
 
 static Py_hash_t py_imbuf_hash(Py_ImBuf *self)
 {
-	return _Py_HashPointer(self->ibuf);
+	return Py_HashPointer(self->ibuf);
 }
 
 PyTypeObject Py_ImBuf_Type = {
@@ -246,7 +246,7 @@ PyTypeObject Py_ImBuf_Type = {
 	/* Methods to implement standard operations */
 
 	(destructor)py_imbuf_dealloc, /* destructor tp_dealloc; */
-	NULL,                       /* printfunc tp_print; */
+	(printfunc)NULL,            /* printfunc tp_print; */
 	NULL,                       /* getattrfunc tp_getattr; */
 	NULL,                       /* setattrfunc tp_setattr; */
 	NULL,                       /* cmpfunc tp_compare; */

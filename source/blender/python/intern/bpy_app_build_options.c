@@ -24,6 +24,10 @@
 
 #include "bpy_app_build_options.h"
 
+#if PY_VERSION_HEX < 0x030d0000 /* <3.13 */
+	#  define Py_HashPointer _Py_HashPointer
+#endif
+
 static PyTypeObject BlenderAppBuildOptionsType;
 
 static PyStructSequence_Field app_builtopts_info_fields[] = {
@@ -306,7 +310,7 @@ PyObject *BPY_app_build_options_struct(void)
 	/* prevent user from creating new instances */
 	BlenderAppBuildOptionsType.tp_init = NULL;
 	BlenderAppBuildOptionsType.tp_new = NULL;
-	BlenderAppBuildOptionsType.tp_hash = (hashfunc)_Py_HashPointer; /* without this we can't do set(sys.modules) [#29635] */
+	BlenderAppBuildOptionsType.tp_hash = (hashfunc)Py_HashPointer; /* without this we can't do set(sys.modules) [#29635] */
 
 	return ret;
 }

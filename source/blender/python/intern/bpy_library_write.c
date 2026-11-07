@@ -118,18 +118,19 @@ static PyObject *bpy_lib_write(PyObject *UNUSED(self), PyObject *args, PyObject 
 
 	PyObject *ret;
 
+	id_store_array = MEM_mallocN(sizeof(*id_store_array) * PySet_Size(datablocks), __func__);
+	id_store = id_store_array;
+
 	/* collect all id data from the set and store in 'id_store_array' */
-	{
-		Py_ssize_t pos, hash;
+	 if (PySet_GET_SIZE(datablocks) > 0) {
+		PyObject *it = PyObject_GetIter(datablocks);
 		PyObject *key;
-
-		id_store_array = MEM_mallocN(sizeof(*id_store_array) * PySet_Size(datablocks), __func__);
-		id_store = id_store_array;
-
-		pos = hash = 0;
-		while (_PySet_NextEntry(datablocks, &pos, &key, &hash)) {
+		while ((key = PyIter_Next(it))) {
+			/* Borrow from the set. */
+			Py_DECREF(key);
 
 			if (!pyrna_id_FromPyObject(key, &id_store->id)) {
+				Py_DECREF(it);
 				PyErr_Format(PyExc_TypeError,
 				             "Expected and ID type, not %.200s",
 				             Py_TYPE(key)->tp_name);
@@ -151,6 +152,7 @@ static PyObject *bpy_lib_write(PyObject *UNUSED(self), PyObject *args, PyObject 
 				id_store++;
 			}
 		}
+		Py_DECREF(it);
 	}
 
 	/* write blend */

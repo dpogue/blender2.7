@@ -24,6 +24,11 @@
 #include "BLI_sys_types.h"
 #include "BLI_utildefines_variadic.h"
 
+#if PY_VERSION_HEX < 0x030d0000 /* <3.13 */
+	#  define PyLong_AsInt _PyLong_AsInt
+	#  define Py_HashPointer _Py_HashPointer
+#endif
+
 void      PyC_ObSpit(const char *name, PyObject *var);
 void      PyC_ObSpitStr(char *result, size_t result_len, PyObject *var);
 void      PyC_LineSpit(void);
@@ -121,7 +126,7 @@ uint64_t PyC_Long_AsU64(PyObject *value);
 #endif
 
 /* inline so type signatures match as expected */
-Py_LOCAL_INLINE(int32_t)  PyC_Long_AsI32(PyObject *value) { return (int32_t)_PyLong_AsInt(value); }
+Py_LOCAL_INLINE(int32_t)  PyC_Long_AsI32(PyObject *value) { return (int32_t)PyLong_AsInt(value); }
 Py_LOCAL_INLINE(int64_t)  PyC_Long_AsI64(PyObject *value) { return (int64_t)PyLong_AsLongLong(value); }
 Py_LOCAL_INLINE(uint64_t) PyC_Long_AsU64(PyObject *value) { return (uint64_t)PyLong_AsUnsignedLongLong(value); }
 

@@ -1046,11 +1046,6 @@ int PyC_FlagSet_ToBitfield(PyC_FlagSet *items, PyObject *value, int *r_value, co
 	/* set of enum items, concatenate all values with OR */
 	int ret, flag = 0;
 
-	/* set looping */
-	Py_ssize_t pos = 0;
-	Py_ssize_t hash = 0;
-	PyObject *key;
-
 	if (!PySet_Check(value)) {
 		PyErr_Format(PyExc_TypeError,
 		             "%.200s expected a set, not %.200s",
@@ -1060,21 +1055,32 @@ int PyC_FlagSet_ToBitfield(PyC_FlagSet *items, PyObject *value, int *r_value, co
 
 	*r_value = 0;
 
-	while (_PySet_NextEntry(value, &pos, &key, &hash)) {
-		const char *param = PyUnicode_AsUTF8(key);
+	if (PySet_GET_SIZE(value) > 0) {
+		PyObject *it = PyObject_GetIter(value);
+		PyObject *key;
+		while ((key = PyIter_Next(it))) {
+			/* Borrow from the set. */
+			Py_DECREF(key);
 
-		if (param == NULL) {
-			PyErr_Format(PyExc_TypeError,
-			             "%.200s set must contain strings, not %.200s",
-			             error_prefix, Py_TYPE(key)->tp_name);
-			return -1;
+			const char *param = PyUnicode_AsUTF8(key);
+			if (param == NULL) {
+				PyErr_Format(PyExc_TypeError,
+							 "%.200s set must contain strings, not %.200s",
+							 error_prefix, Py_TYPE(key)->tp_name);
+				break;
+			}
+
+			if (PyC_FlagSet_ValueFromID(items, param, &ret, error_prefix) < 0) {
+				break;
+			}
+
+			flag |= ret;
 		}
 
-		if (PyC_FlagSet_ValueFromID(items, param, &ret, error_prefix) < 0) {
+		Py_DECREF(it);
+		if (key != NULL) {
 			return -1;
 		}
-
-		flag |= ret;
 	}
 
 	*r_value = flag;
@@ -1262,7 +1268,7 @@ bool PyC_RunString_AsString(const char *imports[], const char *expr, const char 
  */
 int PyC_Long_AsBool(PyObject *value)
 {
-	int test = _PyLong_AsInt(value);
+	int test = PyLong_AsInt(value);
 	if (UNLIKELY((uint)test > 1)) {
 		PyErr_SetString(PyExc_TypeError,
 		                "Python number not a bool (0/1)");
@@ -1273,7 +1279,7 @@ int PyC_Long_AsBool(PyObject *value)
 
 int8_t PyC_Long_AsI8(PyObject *value)
 {
-	int test = _PyLong_AsInt(value);
+	int test = PyLong_AsInt(value);
 	if (UNLIKELY(test < INT8_MIN || test > INT8_MAX)) {
 		PyErr_SetString(PyExc_OverflowError,
 		                "Python int too large to convert to C int8");
@@ -1284,7 +1290,7 @@ int8_t PyC_Long_AsI8(PyObject *value)
 
 int16_t PyC_Long_AsI16(PyObject *value)
 {
-	int test = _PyLong_AsInt(value);
+	int test = PyLong_AsInt(value);
 	if (UNLIKELY(test < INT16_MIN || test > INT16_MAX)) {
 		PyErr_SetString(PyExc_OverflowError,
 		                "Python int too large to convert to C int16");

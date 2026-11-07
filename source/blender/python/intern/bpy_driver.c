@@ -52,6 +52,22 @@ extern void BPY_update_rna_module(void);
 #  include <opcode.h>
 #endif
 
+#if PY_VERSION_HEX >= 0x030d0000 /* >=3.13 */
+	/* WARNING(@ideasman42): Using `Py_BUILD_CORE` is a last resort,
+	 * the alternative would be not to inspect OP-CODES at all. */
+	#  define Py_BUILD_CORE
+	#  include <internal/pycore_code.h>
+	#  undef Py_BUILD_CORE
+#endif
+
+#if PY_VERSION_HEX < 0x030b0000 /* <3.11 */
+static inline PyObject *PyCode_GetCode(PyCodeObject *co) {
+	PyObject *co_code = co->co_code;
+	Py_XINCREF(co_code);
+	return co_code;
+}
+#endif
+
 /* for pydrivers (drivers using one-line Python expressions to express relationships between targets) */
 PyObject *bpy_pydriver_Dict = NULL;
 
@@ -244,74 +260,182 @@ static void pydriver_error(ChannelDriver *driver)
 
 #ifdef USE_BYTECODE_WHITELIST
 
-#define OK_OP(op) [op] = 1
+static bool is_opcode_secure(const int opcode)
+{
+	/* TODO(@ideasman42): Handle intrinsic opcodes (`CALL_INTRINSIC_1` & `CALL_INTRINSIC_2`).
+	 * For Python 3.12. */
 
-static const char secure_opcodes[255] = {
-	OK_OP(POP_TOP),
-	OK_OP(ROT_TWO),
-	OK_OP(ROT_THREE),
-	OK_OP(DUP_TOP),
-	OK_OP(DUP_TOP_TWO),
-	OK_OP(NOP),
-	OK_OP(UNARY_POSITIVE),
-	OK_OP(UNARY_NEGATIVE),
-	OK_OP(UNARY_NOT),
-	OK_OP(UNARY_INVERT),
-	OK_OP(BINARY_MATRIX_MULTIPLY),
-	OK_OP(INPLACE_MATRIX_MULTIPLY),
-	OK_OP(BINARY_POWER),
-	OK_OP(BINARY_MULTIPLY),
-	OK_OP(BINARY_MODULO),
-	OK_OP(BINARY_ADD),
-	OK_OP(BINARY_SUBTRACT),
-	OK_OP(BINARY_SUBSCR),
-	OK_OP(BINARY_FLOOR_DIVIDE),
-	OK_OP(BINARY_TRUE_DIVIDE),
-	OK_OP(INPLACE_FLOOR_DIVIDE),
-	OK_OP(INPLACE_TRUE_DIVIDE),
-	OK_OP(INPLACE_ADD),
-	OK_OP(INPLACE_SUBTRACT),
-	OK_OP(INPLACE_MULTIPLY),
-	OK_OP(INPLACE_MODULO),
-	OK_OP(BINARY_LSHIFT),
-	OK_OP(BINARY_RSHIFT),
-	OK_OP(BINARY_AND),
-	OK_OP(BINARY_XOR),
-	OK_OP(BINARY_OR),
-	OK_OP(INPLACE_POWER),
-	OK_OP(INPLACE_LSHIFT),
-	OK_OP(INPLACE_RSHIFT),
-	OK_OP(INPLACE_AND),
-	OK_OP(INPLACE_XOR),
-	OK_OP(INPLACE_OR),
-	OK_OP(RETURN_VALUE),
-	OK_OP(BUILD_TUPLE),
-	OK_OP(BUILD_LIST),
-	OK_OP(BUILD_SET),
-	OK_OP(BUILD_MAP),
-	OK_OP(COMPARE_OP),
-	OK_OP(JUMP_FORWARD),
-	OK_OP(JUMP_IF_FALSE_OR_POP),
-	OK_OP(JUMP_IF_TRUE_OR_POP),
-	OK_OP(JUMP_ABSOLUTE),
-	OK_OP(POP_JUMP_IF_FALSE),
-	OK_OP(POP_JUMP_IF_TRUE),
-	OK_OP(LOAD_GLOBAL),
-	OK_OP(LOAD_FAST),
-	OK_OP(STORE_FAST),
-	OK_OP(DELETE_FAST),
-	OK_OP(LOAD_DEREF),
-	OK_OP(STORE_DEREF),
+#define OK_OP(op) \
+	case op: \
+		return true;
 
-	/* special cases */
-	OK_OP(LOAD_CONST),         /* ok because constants are accepted */
-	OK_OP(LOAD_NAME),          /* ok, because PyCodeObject.names is checked */
-	OK_OP(CALL_FUNCTION),      /* ok, because we check its 'name' before calling */
-	OK_OP(CALL_FUNCTION_KW),
-	OK_OP(CALL_FUNCTION_EX),
-};
+	switch (opcode) {
+#if PY_VERSION_HEX >= 0x030b0000
+		OK_OP(CACHE)
+		OK_OP(PUSH_NULL)
+#endif
+		OK_OP(POP_TOP)
+		OK_OP(NOP)
+#if PY_VERSION_HEX < 0x030c0000
+		OK_OP(UNARY_POSITIVE)
+#endif
+		OK_OP(UNARY_NEGATIVE)
+		OK_OP(UNARY_NOT)
+		OK_OP(UNARY_INVERT)
+#if PY_VERSION_HEX < 0x030b0000
+		OK_OP(BINARY_MATRIX_MULTIPLY)
+		OK_OP(INPLACE_MATRIX_MULTIPLY)
+		OK_OP(BINARY_POWER)
+		OK_OP(BINARY_MULTIPLY)
+		OK_OP(BINARY_MODULO)
+		OK_OP(BINARY_ADD)
+		OK_OP(BINARY_SUBTRACT)
+		OK_OP(BINARY_FLOOR_DIVIDE)
+		OK_OP(BINARY_TRUE_DIVIDE)
+		OK_OP(INPLACE_FLOOR_DIVIDE)
+		OK_OP(INPLACE_TRUE_DIVIDE)
+		OK_OP(INPLACE_ADD)
+		OK_OP(INPLACE_SUBTRACT)
+		OK_OP(INPLACE_MULTIPLY)
+		OK_OP(INPLACE_MODULO)
+		OK_OP(BINARY_LSHIFT)
+		OK_OP(BINARY_RSHIFT)
+		OK_OP(BINARY_AND)
+		OK_OP(BINARY_XOR)
+		OK_OP(BINARY_OR)
+		OK_OP(INPLACE_POWER)
+		OK_OP(INPLACE_LSHIFT)
+		OK_OP(INPLACE_RSHIFT)
+		OK_OP(INPLACE_AND)
+		OK_OP(INPLACE_XOR)
+		OK_OP(INPLACE_OR)
+#else
+		OK_OP(BINARY_OP)
+#endif
+#if PY_VERSION_HEX < 0x030e0000
+		OK_OP(BINARY_SUBSCR)
+#endif
+#if PY_VERSION_HEX >= 0x030a0000
+		OK_OP(GET_LEN)
+#endif
+#if PY_VERSION_HEX > 0x03090000 && PY_VERSION_HEX < 0x030c0000
+		OK_OP(LIST_TO_TUPLE)
+#endif
+		OK_OP(RETURN_VALUE)
+#if PY_VERSION_HEX >= 0x030b0000
+		OK_OP(SWAP)
+		OK_OP(COPY)
+#else
+		OK_OP(ROT_TWO)
+		OK_OP(ROT_THREE)
+		OK_OP(DUP_TOP)
+		OK_OP(DUP_TOP_TWO)
+#endif
+		OK_OP(BUILD_TUPLE)
+		OK_OP(BUILD_LIST)
+		OK_OP(BUILD_SET)
+		OK_OP(BUILD_MAP)
+		OK_OP(COMPARE_OP)
+		OK_OP(JUMP_FORWARD)
+#if PY_VERSION_HEX < 0x030c0000
+		OK_OP(JUMP_IF_FALSE_OR_POP)
+		OK_OP(JUMP_IF_TRUE_OR_POP)
+#if PY_VERSION_HEX < 0x030b0000
+		OK_OP(JUMP_ABSOLUTE)
+		OK_OP(POP_JUMP_IF_FALSE)
+		OK_OP(POP_JUMP_IF_TRUE)
+#else
+		OK_OP(POP_JUMP_FORWARD_IF_FALSE)
+		OK_OP(POP_JUMP_FORWARD_IF_TRUE)
+#endif
+#endif
+		OK_OP(LOAD_GLOBAL)
+#if PY_VERSION_HEX >= 0x03090000
+		OK_OP(IS_OP)
+		OK_OP(CONTAINS_OP)
+#endif
+		OK_OP(LOAD_FAST)
+		OK_OP(STORE_FAST)
+		OK_OP(DELETE_FAST)
+#if PY_VERSION_HEX == 0x030b0000
+		OK_OP(POP_JUMP_FORWARD_IF_NOT_NONE)
+		OK_OP(POP_JUMP_FORWARD_IF_NONE)
+#endif
+		OK_OP(BUILD_SLICE)
+		OK_OP(LOAD_DEREF)
+		OK_OP(STORE_DEREF)
+#if PY_VERSION_HEX >= 0x030b0000
+		OK_OP(RESUME)
+#endif
+#if PY_VERSION_HEX >= 0x03090000
+		OK_OP(LIST_EXTEND)
+		OK_OP(SET_UPDATE)
+#endif
+
+		/* NOTE(@ideasman42): Don't enable dict manipulation, unless we can prove there is not way it
+		 * can be used to manipulate the name-space (potentially allowing malicious code). */
+#if 0
+		OK_OP(DICT_MERGE)
+		OK_OP(DICT_UPDATE)
+#endif
+
+#if PY_VERSION_HEX == 0x030b0000
+		OK_OP(POP_JUMP_BACKWARD_IF_NOT_NONE)
+		OK_OP(POP_JUMP_BACKWARD_IF_NONE)
+		OK_OP(POP_JUMP_BACKWARD_IF_FALSE)
+		OK_OP(POP_JUMP_BACKWARD_IF_TRUE)
+#endif
+
+		/* Special cases. */
+		OK_OP(LOAD_CONST) /* Ok because constants are accepted. */
+		OK_OP(LOAD_NAME)  /* Ok, because `PyCodeObject.names` is checked. */
+#if PY_VERSION_HEX >= 0x030d0000
+		OK_OP(CALL)       /* Ok, because we check its "name" before calling. */
+#else
+		OK_OP(CALL_FUNCTION) /* Ok, because we check its 'name' before calling */
+		OK_OP(CALL_FUNCTION_KW)
+		OK_OP(CALL_FUNCTION_EX)
+#endif
+
+#if PY_VERSION_HEX >= 0x030d0000
+		OK_OP(CALL_KW) /* Ok, because it's used for calling functions with keyword arguments. */
+		OK_OP(CALL_FUNCTION_EX);
+
+		/* OK because the names are checked. */
+		OK_OP(CALL_ALLOC_AND_ENTER_INIT)
+		OK_OP(CALL_BOUND_METHOD_EXACT_ARGS)
+		OK_OP(CALL_BOUND_METHOD_GENERAL)
+		OK_OP(CALL_BUILTIN_CLASS)
+		OK_OP(CALL_BUILTIN_FAST)
+		OK_OP(CALL_BUILTIN_FAST_WITH_KEYWORDS)
+		OK_OP(CALL_BUILTIN_O)
+		OK_OP(CALL_ISINSTANCE)
+		OK_OP(CALL_LEN)
+		OK_OP(CALL_LIST_APPEND)
+		OK_OP(CALL_METHOD_DESCRIPTOR_FAST)
+		OK_OP(CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS)
+		OK_OP(CALL_METHOD_DESCRIPTOR_NOARGS)
+		OK_OP(CALL_METHOD_DESCRIPTOR_O)
+		OK_OP(CALL_NON_PY_GENERAL)
+		OK_OP(CALL_PY_EXACT_ARGS)
+		OK_OP(CALL_PY_GENERAL)
+		OK_OP(CALL_STR_1)
+		OK_OP(CALL_TUPLE_1)
+		OK_OP(CALL_TYPE_1)
+#else
+#if PY_VERSION_HEX >= 0x030b0000
+		OK_OP(KW_NAMES) /* Ok, because it's used for calling functions with keyword arguments. */
+#endif
+#endif
+
+#if PY_VERSION_HEX == 0x030b0000
+		OK_OP(PRECALL) /* Ok, because it's used for calling. */
+#endif
+	}
 
 #undef OK_OP
+	return false;
+}
 
 static bool bpy_driver_secure_bytecode_validate(PyObject *expr_code, PyObject *dict_arr[])
 {
@@ -342,20 +466,32 @@ static bool bpy_driver_secure_bytecode_validate(PyObject *expr_code, PyObject *d
 	{
 		const _Py_CODEUNIT *codestr;
 		Py_ssize_t  code_len;
+		PyObject *co_code;
 
-		PyBytes_AsStringAndSize(py_code->co_code, (char **)&codestr, &code_len);
+		if (!(co_code = PyCode_GetCode(py_code))) {
+			PyErr_Print();
+			PyErr_Clear();
+			return false;
+		}
+
+		PyBytes_AsStringAndSize(co_code, (char **)&codestr, &code_len);
 		code_len /= sizeof(*codestr);
+		bool ok = true;
 
 		for (Py_ssize_t i = 0; i < code_len; i++) {
 			const int opcode = _Py_OPCODE(codestr[i]);
-			if (secure_opcodes[opcode] == 0) {
+			if (!is_opcode_secure(opcode)) {
 				fprintf(stderr, "\tBPY_driver_eval() - restructed access disallows opcode '%d', "
 				                "enable auto-execution to support\n", opcode);
-				return false;
+				ok = false;
+				break;
 			}
 		}
 
-#undef CODESIZE
+		Py_DECREF(co_code);
+		if (!ok) {
+			return false;
+		}
 	}
 
 	return true;

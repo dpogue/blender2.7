@@ -98,7 +98,7 @@ PyObject *BPY_app_opensubdiv_struct(void)
 	BlenderAppOpenSubdivType.tp_init = NULL;
 	BlenderAppOpenSubdivType.tp_new = NULL;
 	/* without this we can't do set(sys.modules) [#29635] */
-	BlenderAppOpenSubdivType.tp_hash = (hashfunc)_Py_HashPointer;
+	BlenderAppOpenSubdivType.tp_hash = (hashfunc)Py_HashPointer;
 
 	return ret;
 }
