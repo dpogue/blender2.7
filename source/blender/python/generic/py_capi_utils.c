@@ -48,6 +48,10 @@
 #include "BLI_math_base.h"  /* isfinite() */
 #endif
 
+#if PY_VERSION_HEX <= 0x030a0000
+#define PyFrame_GetCode(x)	((x)->f_code)
+#endif
+
 /* array utility function */
 int PyC_AsArray_FAST(
         void *array, PyObject *value_fast, const Py_ssize_t length,
@@ -321,17 +325,21 @@ void PyC_StackSpit(void)
 void PyC_FileAndNum(const char **filename, int *lineno)
 {
 	PyFrameObject *frame;
+	PyCodeObject *code;
 
 	if (filename) *filename = NULL;
 	if (lineno)   *lineno = -1;
 
-	if (!(frame = PyThreadState_GET()->frame)) {
+	if (!(frame = PyEval_GetFrame())) {
+		return;
+	}
+	if (!(code = PyFrame_GetCode(frame))) {
 		return;
 	}
 
 	/* when executing a script */
 	if (filename) {
-		*filename = PyUnicode_AsUTF8(frame->f_code->co_filename);
+		*filename = PyUnicode_AsUTF8(code->co_filename);
 	}
 
 	/* when executing a module */

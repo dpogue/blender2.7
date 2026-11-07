@@ -35,7 +35,13 @@
 
 static const char *traceback_filepath(PyTracebackObject *tb, PyObject **coerce)
 {
+#if PY_VERSION_HEX >= 0x030b0000
+	PyCodeObject *code = PyFrame_GetCode(tb->tb_frame);
+	*coerce = PyUnicode_EncodeFSDefault(code->co_filename);
+	return PyBytes_AS_STRING(*coerce);
+#else
 	return PyBytes_AS_STRING((*coerce = PyUnicode_EncodeFSDefault(tb->tb_frame->f_code->co_filename)));
+#endif
 }
 
 /* copied from pythonrun.c, 3.4.0 */

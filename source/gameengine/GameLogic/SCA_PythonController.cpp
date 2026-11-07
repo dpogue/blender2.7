@@ -32,8 +32,10 @@
 #include "EXP_PyObjectPlus.h"
 
 #ifdef WITH_PYTHON
-#include "compile.h"
-#include "eval.h"
+#  if PY_VERSION_HEX <= 0x030a0000
+#    include "compile.h"
+#    include "eval.h"
+#  endif
 #endif // WITH_PYTHON
 
 #include <algorithm>

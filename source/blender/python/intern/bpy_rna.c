@@ -5919,7 +5919,7 @@ PyTypeObject pyrna_struct_Type = {
 	NULL,                       /* PyBufferProcs *tp_as_buffer; */
 
 	/*** Flags to define presence of optional/expanded features ***/
-	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC, /* long tp_flags; */
+	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* long tp_flags; */
 
 	NULL,                       /*  char *tp_doc;  Documentation string */
 	/*** Assigned meaning in release 2.0 ***/
