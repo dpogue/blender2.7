@@ -43,7 +43,8 @@ static PyObject *Matrix_copy_notest(MatrixObject *self, const float *matrix);
 static PyObject *Matrix_copy(MatrixObject *self);
 static PyObject *Matrix_deepcopy(MatrixObject *self, PyObject *args);
 static int Matrix_ass_slice(MatrixObject *self, int begin, int end, PyObject *value);
-static PyObject *matrix__apply_to_copy(PyNoArgsFunction matrix_func, MatrixObject *self);
+static PyObject *matrix__apply_to_copy(PyObject *(*matrix_func)(MatrixObject *),
+									   MatrixObject *self);
 static PyObject *MatrixAccess_CreatePyObject(MatrixObject *matrix, const eMatrixAccess_t type);
 
 static int matrix_row_vector_check(MatrixObject *mat, VectorObject *vec, int row)
@@ -380,14 +381,15 @@ static PyObject *Matrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 	return NULL;
 }
 
-static PyObject *matrix__apply_to_copy(PyNoArgsFunction matrix_func, MatrixObject *self)
+static PyObject *matrix__apply_to_copy(PyObject *(*matrix_func)(MatrixObject *),
+									   MatrixObject *self)
 {
 	PyObject *ret = Matrix_copy(self);
 	if (ret) {
-		PyObject *ret_dummy = matrix_func(ret);
+		PyObject *ret_dummy = matrix_func((MatrixObject *)ret);
 		if (ret_dummy) {
 			Py_DECREF(ret_dummy);
-			return (PyObject *)ret;
+			return ret;
 		}
 		else { /* error */
 			Py_DECREF(ret);
@@ -1593,7 +1595,7 @@ PyDoc_STRVAR(Matrix_adjugated_doc,
 );
 static PyObject *Matrix_adjugated(MatrixObject *self)
 {
-	return matrix__apply_to_copy((PyNoArgsFunction)Matrix_adjugate, self);
+	return matrix__apply_to_copy(Matrix_adjugate, self);
 }
 
 PyDoc_STRVAR(Matrix_rotate_doc,
@@ -1799,7 +1801,7 @@ PyDoc_STRVAR(Matrix_transposed_doc,
 );
 static PyObject *Matrix_transposed(MatrixObject *self)
 {
-	return matrix__apply_to_copy((PyNoArgsFunction)Matrix_transpose, self);
+	return matrix__apply_to_copy(Matrix_transpose, self);
 }
 
 /*---------------------------matrix.normalize() ------------------*/
@@ -1846,7 +1848,7 @@ PyDoc_STRVAR(Matrix_normalized_doc,
 );
 static PyObject *Matrix_normalized(MatrixObject *self)
 {
-	return matrix__apply_to_copy((PyNoArgsFunction)Matrix_normalize, self);
+	return matrix__apply_to_copy(Matrix_normalize, self);
 }
 
 /*---------------------------matrix.zero() -----------------------*/

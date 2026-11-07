@@ -7510,13 +7510,15 @@ static int bpy_class_validate_recursive(PointerRNA *dummyptr, StructRNA *srna, v
 			PyErr_Clear();
 		}
 		else {
-			Py_DECREF(item); /* no need to keep a ref, the class owns it (technically we should keep a ref but...) */
+			/* Store original so we can decrement it's reference before returning. */
+			PyObject *item_orig = item;
 			if (is_staticmethod) {
 				if (PyMethod_Check(item) == 0) {
 					PyErr_Format(PyExc_TypeError,
 					             "expected %.200s, %.200s class \"%.200s\" "
 					             "attribute to be a static/class method, not a %.200s",
 					             class_type, py_class_name, RNA_function_identifier(func), Py_TYPE(item)->tp_name);
+					Py_DECREF(item_orig);
 					return -1;
 				}
 				item = ((PyMethodObject *)item)->im_func;
@@ -7527,6 +7529,7 @@ static int bpy_class_validate_recursive(PointerRNA *dummyptr, StructRNA *srna, v
 					             "expected %.200s, %.200s class \"%.200s\" "
 					             "attribute to be a function, not a %.200s",
 					             class_type, py_class_name, RNA_function_identifier(func), Py_TYPE(item)->tp_name);
+					Py_DECREF(item_orig);
 					return -1;
 				}
 			}
@@ -7558,9 +7561,11 @@ static int bpy_class_validate_recursive(PointerRNA *dummyptr, StructRNA *srna, v
 						             class_type, py_class_name, RNA_function_identifier(func),
 						             func_arg_count, arg_count);
 					}
+					Py_DECREF(item_orig);
 					return -1;
 				}
 			}
+			Py_DECREF(item_orig);
 		}
 	}
 
