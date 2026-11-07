@@ -812,7 +812,7 @@ static PyObject *gLibNew(PyObject *, PyObject *args)
 		PyObject *ret= PyList_New(0);
 		PyObject *item;
 		for (Py_ssize_t i= 0; i < PyList_GET_SIZE(names); i++) {
-			name= _PyUnicode_AsString(PyList_GET_ITEM(names, i));
+			name= PyUnicode_AsUTF8(PyList_GET_ITEM(names, i));
 			if (name) {
 				RAS_MeshObject *meshobj= kx_scene->GetSceneConverter()->ConvertMeshSpecial(kx_scene, maggie, name);
 				if (meshobj) {

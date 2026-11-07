@@ -234,7 +234,7 @@ PyObject *CListWrapper::py_mapping_subscript(PyObject *self, PyObject *key)
 			return NULL;
 		}
 
-		const char *name = _PyUnicode_AsString(key);
+		const char *name = PyUnicode_AsUTF8(key);
 		int size = list->GetSize();
 
 		for (unsigned int i = 0; i < size; ++i) {
@@ -275,7 +275,7 @@ int CListWrapper::py_mapping_ass_subscript(PyObject *self, PyObject *key, PyObje
 			return -1;
 		}
 
-		const char *name = _PyUnicode_AsString(key);
+		const char *name = PyUnicode_AsUTF8(key);
 		int size = list->GetSize();
 
 		for (unsigned int i = 0; i < size; ++i) {
@@ -314,7 +314,7 @@ int CListWrapper::py_contains(PyObject *self, PyObject *key)
 		return -1;
 	}
 
-	const char *name = _PyUnicode_AsString(key);
+	const char *name = PyUnicode_AsUTF8(key);
 	int size = list->GetSize();
 
 	for (unsigned int i = 0; i < size; ++i) {

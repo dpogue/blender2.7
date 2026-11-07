@@ -350,7 +350,7 @@ PyObject *BL_ActionActuator::PyGetChannel(PyObject *value)
 	PyErr_SetString(PyExc_NotImplementedError, "BL_ActionActuator.getChannel() no longer works, please use BL_ArmatureObject.channels instead");
 	return NULL;
 #if 0 // XXX To be removed in a later version (first removed in 2.64)
-	const char *string= _PyUnicode_AsString(value);
+	const char *string= PyUnicode_AsUTF8(value);
 
 	if (GetParent()->GetGameObjectType() != SCA_IObject::OBJ_ARMATURE)
 	{
@@ -572,7 +572,7 @@ int BL_ActionActuator::pyattr_set_action(void *self_v, const KX_PYATTRIBUTE_DEF 
 	}
 
 	bAction *action= NULL;
-	STR_String val = _PyUnicode_AsString(value);
+	STR_String val = PyUnicode_AsUTF8(value);
 
 	if (val != "")
 	{

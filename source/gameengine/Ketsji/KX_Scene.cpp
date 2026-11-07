@@ -2210,7 +2210,7 @@ PyMethodDef KX_Scene::Methods[] = {
 static PyObject *Map_GetItem(PyObject *self_v, PyObject *item)
 {
 	KX_Scene* self = static_cast<KX_Scene*>BGE_PROXY_REF(self_v);
-	const char *attr_str= _PyUnicode_AsString(item);
+	const char *attr_str= PyUnicode_AsUTF8(item);
 	PyObject *pyconvert;
 
 	if (self == NULL) {
@@ -2239,7 +2239,7 @@ static PyObject *Map_GetItem(PyObject *self_v, PyObject *item)
 static int Map_SetItem(PyObject *self_v, PyObject *key, PyObject *val)
 {
 	KX_Scene* self = static_cast<KX_Scene*>BGE_PROXY_REF(self_v);
-	const char *attr_str= _PyUnicode_AsString(key);
+	const char *attr_str= PyUnicode_AsUTF8(key);
 	if (attr_str==NULL)
 		PyErr_Clear();
 

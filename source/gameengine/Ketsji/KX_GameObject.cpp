@@ -2079,7 +2079,7 @@ PyObject *KX_GameObject::PyReinstancePhysicsMesh(PyObject *args)
 static PyObject *Map_GetItem(PyObject *self_v, PyObject *item)
 {
 	KX_GameObject* self = static_cast<KX_GameObject*>BGE_PROXY_REF(self_v);
-	const char *attr_str= _PyUnicode_AsString(item);
+	const char *attr_str= PyUnicode_AsUTF8(item);
 	CValue* resultattr;
 	PyObject *pyconvert;
 
@@ -2113,7 +2113,7 @@ static PyObject *Map_GetItem(PyObject *self_v, PyObject *item)
 static int Map_SetItem(PyObject *self_v, PyObject *key, PyObject *val)
 {
 	KX_GameObject* self = static_cast<KX_GameObject*>BGE_PROXY_REF(self_v);
-	const char *attr_str= _PyUnicode_AsString(key);
+	const char *attr_str= PyUnicode_AsUTF8(key);
 	if (attr_str==NULL)
 		PyErr_Clear();
 
@@ -2206,7 +2206,7 @@ static int Seq_Contains(PyObject *self_v, PyObject *value)
 		return -1;
 	}
 
-	if (PyUnicode_Check(value) && self->GetProperty(_PyUnicode_AsString(value)))
+	if (PyUnicode_Check(value) && self->GetProperty(PyUnicode_AsUTF8(value)))
 		return 1;
 
 	if (self->m_attr_dict && PyDict_GetItem(self->m_attr_dict, value))
@@ -4116,7 +4116,7 @@ PyObject *KX_GameObject::Pyget(PyObject *args)
 
 
 	if (PyUnicode_Check(key)) {
-		CValue *item = GetProperty(_PyUnicode_AsString(key));
+		CValue *item = GetProperty(PyUnicode_AsUTF8(key));
 		if (item) {
 			ret = item->ConvertValueToPython();
 			if (ret)
@@ -4155,12 +4155,12 @@ bool ConvertPythonToGameObject(SCA_LogicManager *manager, PyObject *value, KX_Ga
 	}
 
 	if (PyUnicode_Check(value)) {
-		*object = (KX_GameObject*)manager->GetGameObjectByName(STR_String( _PyUnicode_AsString(value) ));
+		*object = (KX_GameObject*)manager->GetGameObjectByName(STR_String( PyUnicode_AsUTF8(value) ));
 
 		if (*object) {
 			return true;
 		} else {
-			PyErr_Format(PyExc_ValueError, "%s, requested name \"%s\" did not match any KX_GameObject in this scene", error_prefix, _PyUnicode_AsString(value));
+			PyErr_Format(PyExc_ValueError, "%s, requested name \"%s\" did not match any KX_GameObject in this scene", error_prefix, PyUnicode_AsUTF8(value));
 			return false;
 		}
 	}

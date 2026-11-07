@@ -979,7 +979,7 @@ bool ConvertPythonToCamera(PyObject *value, KX_Camera **object, bool py_none_ok,
 	}
 
 	if (PyUnicode_Check(value)) {
-		STR_String value_str = _PyUnicode_AsString(value);
+		STR_String value_str = PyUnicode_AsUTF8(value);
 		*object = KX_GetActiveScene()->FindCamera(value_str);
 
 		if (*object) {
@@ -987,7 +987,7 @@ bool ConvertPythonToCamera(PyObject *value, KX_Camera **object, bool py_none_ok,
 		} else {
 			PyErr_Format(PyExc_ValueError,
 			             "%s, requested name \"%s\" did not match any KX_Camera in this scene",
-			             error_prefix, _PyUnicode_AsString(value));
+			             error_prefix, PyUnicode_AsUTF8(value));
 			return false;
 		}
 	}

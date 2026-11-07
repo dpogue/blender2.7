@@ -653,7 +653,7 @@ static PyObject *bpy_bmlayercollection_subscript(BPy_BMLayerCollection *self, Py
 {
 	/* don't need error check here */
 	if (PyUnicode_Check(key)) {
-		return bpy_bmlayercollection_subscript_str(self, _PyUnicode_AsString(key));
+		return bpy_bmlayercollection_subscript_str(self, PyUnicode_AsUTF8(key));
 	}
 	else if (PyIndex_Check(key)) {
 		Py_ssize_t i = PyNumber_AsSsize_t(key, PyExc_IndexError);
@@ -707,7 +707,7 @@ static PyObject *bpy_bmlayercollection_subscript(BPy_BMLayerCollection *self, Py
 
 static int bpy_bmlayercollection_contains(BPy_BMLayerCollection *self, PyObject *value)
 {
-	const char *keyname = _PyUnicode_AsString(value);
+	const char *keyname = PyUnicode_AsUTF8(value);
 	CustomData *data;
 	int index;
 

@@ -278,7 +278,7 @@ void PyC_ObSpitStr(char *result, size_t result_len, PyObject *var)
 		        (int)var->ob_refcnt,
 		        (void *)var,
 		        type ? type->tp_name : null_str,
-		        var_str ? _PyUnicode_AsString(var_str) : "<error>");
+		        var_str ? PyUnicode_AsUTF8(var_str) : "<error>");
 		if (var_str != NULL) {
 			Py_DECREF(var_str);
 		}
@@ -331,7 +331,7 @@ void PyC_FileAndNum(const char **filename, int *lineno)
 
 	/* when executing a script */
 	if (filename) {
-		*filename = _PyUnicode_AsString(frame->f_code->co_filename);
+		*filename = PyUnicode_AsUTF8(frame->f_code->co_filename);
 	}
 
 	/* when executing a module */
@@ -344,7 +344,7 @@ void PyC_FileAndNum(const char **filename, int *lineno)
 			if (mod) {
 				PyObject *mod_file = PyModule_GetFilenameObject(mod);
 				if (mod_file) {
-					*filename = _PyUnicode_AsString(mod_name);
+					*filename = PyUnicode_AsUTF8(mod_name);
 					Py_DECREF(mod_file);
 				}
 				else {
@@ -354,7 +354,7 @@ void PyC_FileAndNum(const char **filename, int *lineno)
 
 			/* unlikely, fallback */
 			if (*filename == NULL) {
-				*filename = _PyUnicode_AsString(mod_name);
+				*filename = PyUnicode_AsUTF8(mod_name);
 			}
 		}
 	}
@@ -467,9 +467,9 @@ void PyC_Err_PrintWithFunc(PyObject *py_func)
 
 	/* use py style error */
 	fprintf(stderr, "File \"%s\", line %d, in %s\n",
-	        _PyUnicode_AsString(f_code->co_filename),
+	        PyUnicode_AsUTF8(f_code->co_filename),
 	        f_code->co_firstlineno,
-	        _PyUnicode_AsString(((PyFunctionObject *)py_func)->func_name)
+	        PyUnicode_AsUTF8(((PyFunctionObject *)py_func)->func_name)
 	        );
 }
 
@@ -612,7 +612,7 @@ const char *PyC_UnicodeAsByteAndSize(PyObject *py_str, Py_ssize_t *size, PyObjec
 {
 	const char *result;
 
-	result = _PyUnicode_AsStringAndSize(py_str, size);
+	result = PyUnicode_AsUTF8AndSize(py_str, size);
 
 	if (result) {
 		/* 99% of the time this is enough but we better support non unicode
@@ -641,7 +641,7 @@ const char *PyC_UnicodeAsByte(PyObject *py_str, PyObject **coerce)
 {
 	const char *result;
 
-	result = _PyUnicode_AsString(py_str);
+	result = PyUnicode_AsUTF8(py_str);
 
 	if (result) {
 		/* 99% of the time this is enough but we better support non unicode
@@ -1053,7 +1053,7 @@ int PyC_FlagSet_ToBitfield(PyC_FlagSet *items, PyObject *value, int *r_value, co
 	*r_value = 0;
 
 	while (_PySet_NextEntry(value, &pos, &key, &hash)) {
-		const char *param = _PyUnicode_AsString(key);
+		const char *param = PyUnicode_AsUTF8(key);
 
 		if (param == NULL) {
 			PyErr_Format(PyExc_TypeError,
@@ -1215,7 +1215,7 @@ bool PyC_RunString_AsString(const char *imports[], const char *expr, const char 
 		const char *val;
 		Py_ssize_t val_len;
 
-		val = _PyUnicode_AsStringAndSize(retval, &val_len);
+		val = PyUnicode_AsUTF8AndSize(retval, &val_len);
 		if (val == NULL && PyErr_Occurred()) {
 			ok = false;
 		}

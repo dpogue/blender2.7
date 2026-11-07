@@ -187,7 +187,7 @@ static void _build_translations_cache(PyObject *py_messages, const char *locale)
 						msgctxt = BLT_I18NCONTEXT_DEFAULT_BPYRNA;
 					}
 					else if (PyUnicode_Check(tmp)) {
-						msgctxt = _PyUnicode_AsString(tmp);
+						msgctxt = PyUnicode_AsUTF8(tmp);
 					}
 					else {
 						invalid_key = true;
@@ -195,7 +195,7 @@ static void _build_translations_cache(PyObject *py_messages, const char *locale)
 
 					tmp = PyTuple_GET_ITEM(pykey, 1);
 					if (PyUnicode_Check(tmp)) {
-						msgid = _PyUnicode_AsString(tmp);
+						msgid = PyUnicode_AsUTF8(tmp);
 					}
 					else {
 						invalid_key = true;
@@ -225,7 +225,7 @@ static void _build_translations_cache(PyObject *py_messages, const char *locale)
 				/* Do not overwrite existing keys! */
 				if (BPY_app_translations_py_pgettext(msgctxt, msgid) == msgid) {
 					GHashKey *key = _ghashutil_keyalloc(msgctxt, msgid);
-					BLI_ghash_insert(_translations_cache, key, BLI_strdup(_PyUnicode_AsString(trans)));
+					BLI_ghash_insert(_translations_cache, key, BLI_strdup(PyUnicode_AsUTF8(trans)));
 				}
 			}
 		}
@@ -307,7 +307,7 @@ static PyObject *app_translations_py_messages_register(BlenderAppTranslations *s
 	if (PyDict_Contains(self->py_messages, module_name)) {
 		PyErr_Format(PyExc_ValueError,
 		             "bpy.app.translations.register: translations message cache already contains some data for "
-		             "addon '%s'", (const char *)_PyUnicode_AsString(module_name));
+		             "addon '%s'", (const char *)PyUnicode_AsUTF8(module_name));
 		return NULL;
 	}
 

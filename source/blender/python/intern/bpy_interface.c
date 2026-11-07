@@ -908,7 +908,7 @@ static void bpy_module_delay_init(PyObject *bpy_proxy)
 	/* updating the module dict below will loose the reference to __file__ */
 	PyObject *filename_obj = PyModule_GetFilenameObject(bpy_proxy);
 
-	const char *filename_rel = _PyUnicode_AsString(filename_obj); /* can be relative */
+	const char *filename_rel = PyUnicode_AsUTF8(filename_obj); /* can be relative */
 	char filename_abs[1024];
 
 	BLI_strncpy(filename_abs, filename_rel, sizeof(filename_abs));

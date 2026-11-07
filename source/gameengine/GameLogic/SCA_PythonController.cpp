@@ -194,7 +194,7 @@ SCA_IActuator* SCA_PythonController::LinkedActuatorFromPy(PyObject *value)
 
 	if (PyUnicode_Check(value)) {
 		/* get the actuator from the name */
-		const char *name= _PyUnicode_AsString(value);
+		const char *name= PyUnicode_AsUTF8(value);
 		for (it = lacts.begin(); it!= lacts.end(); ++it) {
 			if ( name == (*it)->GetName() ) {
 				return *it;
@@ -503,7 +503,7 @@ int SCA_PythonController::pyattr_set_script(void *self_v, const KX_PYATTRIBUTE_D
 {
 	SCA_PythonController* self = static_cast<SCA_PythonController*>(self_v);
 
-	const char *scriptArg = _PyUnicode_AsString(value);
+	const char *scriptArg = PyUnicode_AsUTF8(value);
 
 	if (scriptArg==NULL) {
 		PyErr_SetString(PyExc_TypeError, "controller.script = string: Python Controller, expected a string script text");

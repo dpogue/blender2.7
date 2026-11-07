@@ -361,7 +361,7 @@ static PyObject *listvalue_mapping_subscript(PyObject *self, PyObject *key)
 	}
 
 	if (PyUnicode_Check(key)) {
-		CValue *item = ((CListValue*) list)->FindValue(_PyUnicode_AsString(key));
+		CValue *item = ((CListValue*) list)->FindValue(PyUnicode_AsUTF8(key));
 		if (item) {
 			PyObject *pyobj = item->ConvertValueToPython();
 			if (pyobj)
@@ -482,7 +482,7 @@ static int listvalue_buffer_contains(PyObject *self_v, PyObject *value)
 	}
 
 	if (PyUnicode_Check(value)) {
-		if (self->FindValue((const char *)_PyUnicode_AsString(value))) {
+		if (self->FindValue((const char *)PyUnicode_AsUTF8(value))) {
 			return 1;
 		}
 	}

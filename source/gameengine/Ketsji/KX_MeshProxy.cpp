@@ -419,12 +419,12 @@ bool ConvertPythonToMesh(SCA_LogicManager *logicmgr, PyObject *value, RAS_MeshOb
 	}
 
 	if (PyUnicode_Check(value)) {
-		*object = (RAS_MeshObject*)logicmgr->GetMeshByName(STR_String( _PyUnicode_AsString(value) ));
+		*object = (RAS_MeshObject*)logicmgr->GetMeshByName(STR_String( PyUnicode_AsUTF8(value) ));
 
 		if (*object) {
 			return true;
 		} else {
-			PyErr_Format(PyExc_ValueError, "%s, requested name \"%s\" did not match any KX_MeshProxy in this scene", error_prefix, _PyUnicode_AsString(value));
+			PyErr_Format(PyExc_ValueError, "%s, requested name \"%s\" did not match any KX_MeshProxy in this scene", error_prefix, PyUnicode_AsUTF8(value));
 			return false;
 		}
 	}

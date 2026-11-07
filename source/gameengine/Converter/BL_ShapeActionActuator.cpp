@@ -535,7 +535,7 @@ int BL_ShapeActionActuator::pyattr_set_action(void *self_v, const KX_PYATTRIBUTE
 	}
 
 	bAction *action= NULL;
-	STR_String val = _PyUnicode_AsString(value);
+	STR_String val = PyUnicode_AsUTF8(value);
 
 	if (val != "")
 	{

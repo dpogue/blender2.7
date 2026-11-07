@@ -237,7 +237,7 @@ static PyObject *bpy_escape_identifier(PyObject *UNUSED(self), PyObject *value)
 	PyObject   *value_escape;
 	size_t size;
 
-	value_str = _PyUnicode_AsStringAndSize(value, &value_str_len);
+	value_str = PyUnicode_AsUTF8AndSize(value, &value_str_len);
 
 	if (value_str == NULL) {
 		PyErr_SetString(PyExc_TypeError, "expected a string");
