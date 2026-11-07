@@ -639,8 +639,8 @@ Vector3Dim<Scalar>::getOrthogonalntlVector3Dim() const
     */
   Vector3Dim<Scalar> vec(0.0);
   vec[(max+1)%3]= 1;
-  vec.normalize();
-  vec.projectNormalTo(this->getNormalized());
+  normalize(vec);
+  vec.projectNormalTo(getNormalized(this));
   return vec;
 }
 
